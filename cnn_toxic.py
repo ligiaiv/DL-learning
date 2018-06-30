@@ -71,3 +71,16 @@ for word,i in word2idx.items():
 
 # load pre-trained word embedding into an Embedding layer
 # trainable = False so the embeddings are fixed
+
+embedding_layer=Embedding(
+	num_words,
+	EMBEDDING_DIM,
+	weights = [embedding_matrix],
+	input_lenght = MAX_SEQUENCE_LENGTH.
+	trainable = False
+)
+
+print('Building model ...')
+
+# train a 1D convnet with global maxpooling
+input_ = 
