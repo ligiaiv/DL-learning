@@ -3,7 +3,7 @@ from builtins import range
 
 import os
 import sys
-import numpy as numpy
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from keras.preprocessing.text import Tokenizer
@@ -24,7 +24,9 @@ EPOCHS = 100
 
 print('Loading word vectors...')
 word2vec = {}
-with open(os.path.join('../BigFiles/glove.6B.%sd.txt' % EMBEDDING_DIM)) as f:
+here= os.path.dirname(os.path.realpath(__file__))+('/BigFiles/glove.6B/glove.6B.%sd.txt' % EMBEDDING_DIM)
+print(here)
+with open(here) as f:
     for line in f:
         values = line.split()
         word = values[0]
