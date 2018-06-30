@@ -33,3 +33,41 @@ with open(here) as f:
         vec = np.asarray(values[1:],dtype = 'float32')
         word2vec[word] = vec
 print('Found %s word vectors.' % len(word2vec))
+
+print('Loading in comments...')
+train = pd.read_csv('../BigFiles/toxic_comments/train.csv')
+sentences = train['comment_text'].fillna("DUMMY_VALUE").values
+possible_labels = ["toxic","severe_toxic","obscene","threat","insult","identity_hater"]
+targets = train[possible_labels].values
+
+print("max sequence length",max(len(s) for s in sentences))
+print("min sequence length",min(len(s) for s in sentences))
+s = sorted(len(s) for s in sentences)
+print("median sequence length",s[len(s)//2])
+
+# convert the sentences(strings) into integers
+
+tokenizer = Tokenizer(num_words=MAX_VOCAB_SIZE)
+tokenizer.fit_on_texts(sentences) #gives each word a number
+sequences = tokenizer.texts_to_sequences(sentences) #replaces each word with its index
+
+word2idx = tokenizer.word_index
+print('Found %s unique tokens.' % len(word2idx))
+
+data = pad_sequences(sequences,maxlen(MAX_SEQUENCE_LENGTH))
+print('Shape of data tensor: ',data.shape)
+
+#prepare embedding matrix
+
+print('Filling pre-trained embeddings...')
+num_words = min(MAX_VOCAB_SIZE,len(word2idx)+1)
+embedding_matrix = np.zeros((num_words,EMBEDDING_DIM))
+for word,i in word2idx.items():
+	if i<MAX_VOCAB_SIZE:
+		embedding_vector = word2vec.get(word)
+		if embedding_vector is not None:
+			embedding_matrix[i] = embedding_vector
+
+
+# load pre-trained word embedding into an Embedding layer
+# trainable = False so the embeddings are fixed
