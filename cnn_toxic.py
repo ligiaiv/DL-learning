@@ -76,11 +76,46 @@ embedding_layer=Embedding(
 	num_words,
 	EMBEDDING_DIM,
 	weights = [embedding_matrix],
-	input_lenght = MAX_SEQUENCE_LENGTH.
+	input_lenght = MAX_SEQUENCE_LENGTH,
 	trainable = False
 )
 
 print('Building model ...')
 
 # train a 1D convnet with global maxpooling
-input_ = 
+input_ = Input(shape = (MAX_SEQUENCE_LENGTH,))
+x = embedding_layer(input_)
+x = Conv1d(128,3,activation = 'relu')(x)
+x = MaxPooling1D(3)(x)
+x = Conv1d(128,3,activation = 'relu')(x)
+x = MaxPooling1D(3)(x)
+x = Conv1d(128,3,activation = 'relu')(x)
+x = GlobalMaxPooling1D()(x)
+x = Dense(128,activation = 'relu')(x)
+output = Dense(len(possible_labels),activation = 'sigmoid')(x)
+
+model = Model(input_,output)
+model.compile(
+    loss ='binary_crossentropy',
+    optimizer = 'rmsprop',
+    metrics = ['accuracy']
+    )
+print('training model...')
+r = model.fit(
+    data,
+    targets,
+    batch_size = BATCH_SIZE,
+    epochs = EPOCHS,
+    validation_split = VALIDATION_SPLIT
+    )
+plt.plot(r.history['loss'],label = 'loss')
+plt.plot(r.history['val_acc'],label = 'val_acc')
+plt.legend()
+plt.show()
+
+p = model.predict(data)
+aucs = []
+for j in range(6)
+    auc = roc_auc_score(targets[:,j],p[:,j])
+    aucs.append(auc)
+print(np.mean(aucs))
