@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Dense, Input, GlobalMaxPooling1D
+from keras.layers import Conv1D, MaxPooling1D,Embedding
 from keras.models import Model
 from sklearn.metrics import roc_auc_score
 
@@ -24,9 +25,9 @@ EPOCHS = 100
 
 print('Loading word vectors...')
 word2vec = {}
-here= os.path.dirname(os.path.realpath(__file__))+('/BigFiles/glove.6B/glove.6B.%sd.txt' % EMBEDDING_DIM)
+here= os.path.dirname(os.path.realpath(__file__))
 print(here)
-with open(here) as f:
+with open(here + ('/BigFiles/glove.6B/glove.6B.%sd.txt' % EMBEDDING_DIM)) as f:
     for line in f:
         values = line.split()
         word = values[0]
@@ -35,9 +36,9 @@ with open(here) as f:
 print('Found %s word vectors.' % len(word2vec))
 
 print('Loading in comments...')
-train = pd.read_csv('../BigFiles/toxic_comments/train.csv')
+train = pd.read_csv(here+'/BigFiles/toxic_comments/train.csv')
 sentences = train['comment_text'].fillna("DUMMY_VALUE").values
-possible_labels = ["toxic","severe_toxic","obscene","threat","insult","identity_hater"]
+possible_labels = ["toxic","severe_toxic","obscene","threat","insult","identity_hate"]
 targets = train[possible_labels].values
 
 print("max sequence length",max(len(s) for s in sentences))
@@ -54,7 +55,7 @@ sequences = tokenizer.texts_to_sequences(sentences) #replaces each word with its
 word2idx = tokenizer.word_index
 print('Found %s unique tokens.' % len(word2idx))
 
-data = pad_sequences(sequences,maxlen(MAX_SEQUENCE_LENGTH))
+data = pad_sequences(sequences,maxlen = MAX_SEQUENCE_LENGTH)
 print('Shape of data tensor: ',data.shape)
 
 #prepare embedding matrix
@@ -76,7 +77,7 @@ embedding_layer=Embedding(
 	num_words,
 	EMBEDDING_DIM,
 	weights = [embedding_matrix],
-	input_lenght = MAX_SEQUENCE_LENGTH,
+	input_length = MAX_SEQUENCE_LENGTH,
 	trainable = False
 )
 
@@ -85,11 +86,11 @@ print('Building model ...')
 # train a 1D convnet with global maxpooling
 input_ = Input(shape = (MAX_SEQUENCE_LENGTH,))
 x = embedding_layer(input_)
-x = Conv1d(128,3,activation = 'relu')(x)
+x = Conv1D(128,3,activation = 'relu')(x)
 x = MaxPooling1D(3)(x)
-x = Conv1d(128,3,activation = 'relu')(x)
+x = Conv1D(128,3,activation = 'relu')(x)
 x = MaxPooling1D(3)(x)
-x = Conv1d(128,3,activation = 'relu')(x)
+x = Conv1D(128,3,activation = 'relu')(x)
 x = GlobalMaxPooling1D()(x)
 x = Dense(128,activation = 'relu')(x)
 output = Dense(len(possible_labels),activation = 'sigmoid')(x)
@@ -115,7 +116,7 @@ plt.show()
 
 p = model.predict(data)
 aucs = []
-for j in range(6)
+for j in range(6):
     auc = roc_auc_score(targets[:,j],p[:,j])
     aucs.append(auc)
 print(np.mean(aucs))
